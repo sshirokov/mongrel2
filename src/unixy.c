@@ -2,23 +2,23 @@
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- * 
+ *
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- * 
+ *
  *     * Neither the name of the Mongrel2 Project, Zed A. Shaw, nor the names
  *       of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written
  *       permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
  * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -50,6 +50,9 @@ int Unixy_chroot(bstring path)
     const char *to_dir = bdata(path);
 
     check(to_dir && blength(path) > 0, "Invalid or empty path for chroot.");
+
+    rc = chdir(to_dir);
+    check(rc == 0, "Can't chdir to %s before attempting chroot.", bdata(path))
 
     rc = chroot(to_dir);
     check(rc == 0, "Can't chroot to %s, rerun as root if this is what you want.", bdata(path));
@@ -117,7 +120,7 @@ int Unixy_still_running(bstring pid_path, pid_t *pid)
     if(*pid < 0) {
         return 0;
     }
-    
+
     // If we can signal it, it must be alive.
     rc = kill(*pid, 0);
     return rc == 0;
@@ -166,8 +169,8 @@ int Unixy_pid_file(bstring path)
     check(pid_file, "Failed to open PID file %s for writing.", pid_path);
 
     rc =  fprintf(pid_file, "%d", getpid());
-    check(rc > 0, "Failed to write PID to file %s", pid_path); 
-   
+    check(rc > 0, "Failed to write PID to file %s", pid_path);
+
 
     if(pid_path) free(pid_path);
     fclose(pid_file);
@@ -208,4 +211,3 @@ error:
     free(wd);
     return dir;
 }
-
